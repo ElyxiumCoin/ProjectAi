@@ -1,101 +1,63 @@
 <!doctype html>
 <html lang="ru">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Chart Photo AI</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chart Photo AI — Gemini</title>
 <style>
-:root{color-scheme:dark;--bg:#090d16;--panel:#111827;--line:#263247;--muted:#91a0b8;--text:#f4f7fb;--accent:#7c5cff;--green:#22c55e;--red:#ef4444}
+:root{color-scheme:dark;--bg:#090d16;--panel:#111827;--line:#263247;--muted:#91a0b8;--text:#f4f7fb;--accent:#7657f6}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 20% 0%,#1a2140 0,transparent 36%),var(--bg);color:var(--text);font:16px system-ui,-apple-system,Segoe UI,sans-serif}
-main{max-width:760px;margin:auto;padding:22px 16px 48px}.top{display:flex;align-items:center;gap:12px;margin-bottom:20px}.logo{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#8b5cf6,#2563eb);display:grid;place-items:center;font-size:22px;font-weight:800}.sub{color:var(--muted);font-size:13px;margin-top:3px}
-h1{font-size:22px;margin:0}.panel{background:rgba(17,24,39,.94);border:1px solid var(--line);border-radius:18px;padding:18px;margin:14px 0;box-shadow:0 12px 35px #0003}
-label{display:block;font-size:13px;color:#c4cde0;margin:12px 0 7px}input,select,button{font:inherit}input[type=password],input[type=text],select{width:100%;padding:13px;border:1px solid var(--line);border-radius:12px;background:#0b1220;color:var(--text);outline:none}
-input:focus,select:focus{border-color:var(--accent)}.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.drop{border:1px dashed #596782;border-radius:14px;padding:22px;text-align:center;background:#0b1220;cursor:pointer}.drop strong{display:block;margin-bottom:5px}.hint{font-size:12px;color:var(--muted)}
+main{max-width:760px;margin:auto;padding:22px 16px 48px}.top{display:flex;align-items:center;gap:12px;margin-bottom:20px}.logo{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#8b5cf6,#2563eb);display:grid;place-items:center;font-size:22px;font-weight:800}
+h1{font-size:22px;margin:0}.sub,.hint{color:var(--muted);font-size:13px}.panel{background:rgba(17,24,39,.95);border:1px solid var(--line);border-radius:18px;padding:18px;margin:14px 0}
+label{display:block;font-size:13px;color:#c4cde0;margin:12px 0 7px}input,select,button{font:inherit}input[type=password],input[type=text],select{width:100%;padding:13px;border:1px solid var(--line);border-radius:12px;background:#0b1220;color:var(--text)}
+.drop{border:1px dashed #596782;border-radius:14px;padding:22px;text-align:center;background:#0b1220;cursor:pointer}.drop strong{display:block;margin-bottom:5px}
 #preview{display:none;width:100%;max-height:330px;object-fit:contain;margin-top:14px;border-radius:12px;background:#070b12}
-button{border:0;border-radius:12px;padding:14px 18px;background:linear-gradient(135deg,#805cff,#4f46e5);color:white;font-weight:700;width:100%;cursor:pointer;margin-top:15px}button:disabled{opacity:.55;cursor:wait}
-.smallbtn{background:#202b40;border:1px solid var(--line);margin-top:8px}
-#status{color:var(--muted);font-size:13px;margin-top:12px;white-space:pre-wrap}
-.result{display:none}.signal{font-size:28px;font-weight:850;letter-spacing:1px}.buy{color:var(--green)}.sell{color:var(--red)}.wait{color:#fbbf24}
-.result p{line-height:1.55;color:#d8e0ee}.result h3{margin:18px 0 6px;font-size:14px;color:#aebbd0}.disclaimer{font-size:12px;color:var(--muted);line-height:1.5}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}button{border:0;border-radius:12px;padding:14px 18px;background:linear-gradient(135deg,#805cff,#4f46e5);color:white;font-weight:700;width:100%;cursor:pointer;margin-top:15px}button:disabled{opacity:.55}
+#status{color:var(--muted);font-size:13px;margin-top:12px;white-space:pre-wrap}.result{display:none}.signal{font-size:28px;font-weight:850}.buy{color:#22c55e}.sell{color:#ef4444}.wait{color:#fbbf24}.result p{line-height:1.55;color:#d8e0ee}.result h3{margin:18px 0 6px;font-size:14px;color:#aebbd0}.disclaimer{font-size:12px;color:var(--muted);line-height:1.5}
 @media(max-width:520px){.row{grid-template-columns:1fr}}
-</style>
-</head>
-<body>
-<main>
-  <div class="top"><div class="logo">AI</div><div><h1>Chart Photo AI</h1><div class="sub">Технический анализ графика по фотографии</div></div></div>
-
-  <section class="panel">
-    <label for="apiKey">OpenAI API-ключ</label>
-    <input id="apiKey" type="password" placeholder="Вставь новый ключ sk-..." autocomplete="off">
-    <div class="hint">Ключ вводится в этом браузере и не сохраняется. Не используй ключ, который уже отправлял в чат.</div>
-    <label>Фото графика</label>
-    <label class="drop" for="photo"><strong>＋ Загрузить изображение</strong><span class="hint">JPG, PNG или WEBP · до 8 МБ</span></label>
-    <input id="photo" type="file" accept="image/png,image/jpeg,image/webp" hidden>
-    <img id="preview" alt="Предпросмотр графика">
-    <div class="row">
-      <div><label for="asset">Инструмент</label><input id="asset" type="text" placeholder="Например, BTC/USDT"></div>
-      <div><label for="tf">Таймфрейм</label><select id="tf"><option>Неизвестен</option><option>1m</option><option>5m</option><option>15m</option><option>30m</option><option>1H</option><option>4H</option><option>1D</option><option>1W</option></select></div>
-    </div>
-    <button id="analyze">Проанализировать фото</button>
-    <div id="status"></div>
-  </section>
-
-  <section class="panel result" id="result">
-    <div class="hint">РЕЗУЛЬТАТ АНАЛИЗА</div>
-    <div class="signal" id="signal"></div>
-    <div id="summary"></div>
-    <div id="details"></div>
-  </section>
-  <p class="disclaimer">Важно: это экспериментальный ИИ-анализ изображения, а не финансовая рекомендация. Модель может ошибаться и не видит реальные котировки. Не открывай сделки только по этому сигналу.</p>
+</style></head>
+<body><main>
+<div class="top"><div class="logo">AI</div><div><h1>Chart Photo AI</h1><div class="sub">Бесплатный анализ графика через Google Gemini</div></div></div>
+<section class="panel">
+<label for="apiKey">Google Gemini API-ключ</label><input id="apiKey" type="password" placeholder="Вставь ключ Google AI Studio" autocomplete="off">
+<div class="hint">Ключ Google, не OpenAI. Вводится только на время работы страницы и не сохраняется.</div>
+<label>Фото графика</label><label class="drop" for="photo"><strong>＋ Загрузить изображение</strong><span class="hint">JPG, PNG или WEBP · до 8 МБ</span></label>
+<input id="photo" type="file" accept="image/png,image/jpeg,image/webp" hidden><img id="preview" alt="Предпросмотр графика">
+<div class="row"><div><label for="asset">Инструмент</label><input id="asset" type="text" placeholder="Например, BTC/USDT"></div><div><label for="tf">Таймфрейм</label><select id="tf"><option>Неизвестен</option><option>1m</option><option>5m</option><option>15m</option><option>30m</option><option>1H</option><option>4H</option><option>1D</option><option>1W</option></select></div></div>
+<button id="analyze">Проанализировать фото</button><div id="status"></div>
+</section>
+<section class="panel result" id="result"><div class="hint">РЕЗУЛЬТАТ АНАЛИЗА</div><div class="signal" id="signal"></div><div id="summary"></div><div id="details"></div></section>
+<p class="disclaimer">Важно: бесплатный тариф имеет ограничения. Google указывает, что данные бесплатного тарифа могут использоваться для улучшения продуктов. Не загружай приватные изображения. Анализ ИИ — не финансовая рекомендация; модель может ошибаться.</p>
 </main>
 <script>
-let imageData = "";
-const photo = document.getElementById("photo");
-const preview = document.getElementById("preview");
-const statusEl = document.getElementById("status");
-const button = document.getElementById("analyze");
-photo.addEventListener("change", () => {
-  const file = photo.files?.[0];
-  if (!file) return;
-  if (!["image/png","image/jpeg","image/webp"].includes(file.type)) { statusEl.textContent="Выбери JPG, PNG или WEBP."; return; }
-  if (file.size > 8*1024*1024) { statusEl.textContent="Файл больше 8 МБ. Выбери изображение поменьше."; return; }
-  const reader = new FileReader();
-  reader.onload = () => { imageData = reader.result; preview.src=imageData; preview.style.display="block"; statusEl.textContent="Фото загружено. Можно запускать анализ."; };
-  reader.readAsDataURL(file);
+let imageData="", mimeType="";
+const photo=document.getElementById("photo"), preview=document.getElementById("preview"), statusEl=document.getElementById("status"), button=document.getElementById("analyze");
+photo.addEventListener("change",()=>{
+ const file=photo.files?.[0]; if(!file)return;
+ if(!["image/png","image/jpeg","image/webp"].includes(file.type)){statusEl.textContent="Выбери JPG, PNG или WEBP.";return}
+ if(file.size>8*1024*1024){statusEl.textContent="Файл больше 8 МБ.";return}
+ const reader=new FileReader(); reader.onload=()=>{imageData=String(reader.result).split(",")[1];mimeType=file.type;preview.src=reader.result;preview.style.display="block";statusEl.textContent="Фото загружено.";};reader.readAsDataURL(file);
 });
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
-button.addEventListener("click", async () => {
-  const key=document.getElementById("apiKey").value.trim();
-  if(!key){statusEl.textContent="Сначала вставь новый OpenAI API-ключ.";return;}
-  if(!imageData){statusEl.textContent="Сначала загрузи фото графика.";return;}
-  button.disabled=true; button.textContent="Анализирую...";
-  statusEl.textContent="Отправляю изображение на анализ. Это может занять несколько секунд.";
-  document.getElementById("result").style.display="none";
-  const asset=document.getElementById("asset").value.trim()||"не указан";
-  const tf=document.getElementById("tf").value;
-  const prompt=`Ты аналитик технического анализа. Изучи приложенное изображение графика. Инструмент: ${asset}. Таймфрейм: ${tf}. Не выдумывай значения, которых нельзя прочитать. Если данных недостаточно, выбери WAIT. Верни строго JSON без markdown со структурой: {"signal":"BUY|SELL|WAIT","confidence":"низкая|средняя|высокая","summary":"краткий вывод","trend":"тренд или неопределённость","levels":"видимые уровни поддержки и сопротивления; если не читаются, так и напиши","entry":"условие входа или нет сигнала","stop_loss":"ориентир или не определён","take_profit":"ориентир или не определён","indicators":"что реально видно на графике","risks":"основные риски и что подтвердит/отменит сценарий"}. Это не финансовая рекомендация.`;
-  try{
-    const res=await fetch("https://api.openai.com/v1/responses",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+key},body:JSON.stringify({model:"gpt-4.1-mini",input:[{role:"user",content:[{type:"input_text",text:prompt},{type:"input_image",image_url:imageData}]}],max_output_tokens:900})});
-    const data=await res.json();
-    if(!res.ok) throw new Error(data.error?.message||("HTTP "+res.status));
-    const textOut=(data.output||[]).flatMap(x=>x.content||[]).filter(x=>x.type==="output_text").map(x=>x.text).join("\n");
-    if(!textOut) throw new Error("ИИ не вернул текстовый ответ.");
-    let parsed;
-    try{const clean=textOut.replace(/^```(?:json)?\s*/i,"").replace(/\s*```$/,"");parsed=JSON.parse(clean);}
-    catch{throw new Error("Не удалось разобрать ответ ИИ. Попробуй другое фото.");}
-    const sig=(parsed.signal||"WAIT").toUpperCase();
-    const signalEl=document.getElementById("signal");
-    signalEl.textContent=["BUY","SELL","WAIT"].includes(sig)?sig:"WAIT";
-    signalEl.className="signal "+(sig==="BUY"?"buy":sig==="SELL"?"sell":"wait");
-    document.getElementById("summary").innerHTML=`<p>${esc(parsed.summary)}</p><div class="hint">Уверенность: ${esc(parsed.confidence||"не определена")}</div>`;
-    const fields=[["Тренд",parsed.trend],["Поддержка и сопротивление",parsed.levels],["Вход",parsed.entry],["Stop Loss",parsed.stop_loss],["Take Profit",parsed.take_profit],["Индикаторы",parsed.indicators],["Риски",parsed.risks]];
-    document.getElementById("details").innerHTML=fields.map(([k,v])=>`<h3>${esc(k)}</h3><p>${esc(v||"Не определено")}</p>`).join("");
-    document.getElementById("result").style.display="block";
-    statusEl.textContent="Готово.";
-  }catch(e){statusEl.textContent="Ошибка: "+e.message+"\nЕсли ошибка связана с сетью или CORS, прямой вызов API из GitHub Pages может блокироваться браузером — тогда понадобится сервер-посредник.";}
-  finally{button.disabled=false;button.textContent="Проанализировать фото";}
+button.addEventListener("click",async()=>{
+ const key=document.getElementById("apiKey").value.trim();
+ if(!key){statusEl.textContent="Вставь Google Gemini API-ключ.";return}
+ if(!imageData){statusEl.textContent="Сначала загрузи фото графика.";return}
+ button.disabled=true;button.textContent="Анализирую...";statusEl.textContent="Отправляю фото в Gemini...";
+ document.getElementById("result").style.display="none";
+ const asset=document.getElementById("asset").value.trim()||"не указан",tf=document.getElementById("tf").value;
+ const prompt=`Ты аналитик технического анализа. Изучи изображение графика. Инструмент: ${asset}. Таймфрейм: ${tf}. Не выдумывай значения, которых нельзя прочитать. Если данных недостаточно, выбери WAIT. Верни только JSON без markdown: {"signal":"BUY|SELL|WAIT","confidence":"низкая|средняя|высокая","summary":"краткий вывод","trend":"тренд или неопределённость","levels":"видимые поддержки и сопротивления","entry":"условие входа или нет сигнала","stop_loss":"ориентир или не определён","take_profit":"ориентир или не определён","indicators":"что реально видно","risks":"риски и условия отмены сценария"}.`;
+ try{
+  const url="https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key="+encodeURIComponent(key);
+  const res=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({contents:[{parts:[{text:prompt},{inline_data:{mime_type:mimeType,data:imageData}}]}],generationConfig:{responseMimeType:"application/json",temperature:0.2,maxOutputTokens:900}})});
+  const data=await res.json();if(!res.ok)throw new Error(data.error?.message||("HTTP "+res.status));
+  const out=(data.candidates?.[0]?.content?.parts||[]).map(p=>p.text||"").join("");if(!out)throw new Error("Gemini не вернул ответ.");
+  const parsed=JSON.parse(out);const sig=["BUY","SELL","WAIT"].includes(String(parsed.signal).toUpperCase())?String(parsed.signal).toUpperCase():"WAIT";
+  const se=document.getElementById("signal");se.textContent=sig;se.className="signal "+(sig==="BUY"?"buy":sig==="SELL"?"sell":"wait");
+  document.getElementById("summary").innerHTML=`<p>${esc(parsed.summary)}</p><div class="hint">Уверенность: ${esc(parsed.confidence||"не определена")}</div>`;
+  const fields=[["Тренд",parsed.trend],["Поддержка и сопротивление",parsed.levels],["Вход",parsed.entry],["Stop Loss",parsed.stop_loss],["Take Profit",parsed.take_profit],["Индикаторы",parsed.indicators],["Риски",parsed.risks]];
+  document.getElementById("details").innerHTML=fields.map(([k,v])=>`<h3>${esc(k)}</h3><p>${esc(v||"Не определено")}</p>`).join("");
+  document.getElementById("result").style.display="block";statusEl.textContent="Готово.";
+ }catch(e){statusEl.textContent="Ошибка: "+e.message+"\nПроверь ключ и бесплатную квоту Gemini. Если браузер блокирует запрос, потребуется небольшой сервер-посредник."}
+ finally{button.disabled=false;button.textContent="Проанализировать фото"}
 });
-</script>
-</body>
-</html>
+</script></body></html>
